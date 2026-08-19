@@ -72,7 +72,7 @@ def index():
     records = []
     if supabase:
         try:
-            response = supabase.table("tickler_records").select("*").order("follow_up_date", desc=False).execute()
+            response = supabase.table("tickler_records").select("*").order("id", desc=True).execute()
             records = response.data if response.data else []
         except Exception as e:
             print(f"Supabase error: {e}")
@@ -94,8 +94,7 @@ def add_record():
     }
     if supabase:
         try:
-            res = supabase.table("tickler_records").insert(data).execute()
-            print("Insert result:", res)
+            supabase.table("tickler_records").insert(data).execute()
         except Exception as e:
             print(f"Error adding record: {e}")
             
