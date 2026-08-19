@@ -88,14 +88,14 @@ def add_record():
         "category": request.form.get("category"),
         "generated_date": request.form.get("generated_date"),
         "follow_up_date": request.form.get("follow_up_date"),
-        "phone": request.form.get("phone"),
-        "email": request.form.get("email"),
-        "notes": request.form.get("notes"),
-        "status": "Pending"
+        "phone": request.form.get("phone") or None,
+        "email": request.form.get("email") or None,
+        "notes": request.form.get("notes") or None
     }
     if supabase:
         try:
-            supabase.table("tickler_records").insert(data).execute()
+            res = supabase.table("tickler_records").insert(data).execute()
+            print("Insert result:", res)
         except Exception as e:
             print(f"Error adding record: {e}")
             
