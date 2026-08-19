@@ -5,17 +5,18 @@ from supabase import create_client, Client
 
 app = Flask(__name__)
 
-# Secret key for session signing (Set this in Render Env Variables or use fallback)
+# Secret key for session signing
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super-secret-tickler-key")
 
-# App Password (Set APP_PASSWORD in Render Env Variables, defaults to 'password123')
+# App Password
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "password123")
 
-# Supabase Credentials from Environment Variables
+# Supabase Credentials
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
+# Initialize Supabase client safely
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if (SUPABASE_URL and SUPABASE_KEY) else None
 
 CATEGORIES = [
     "Walking For Dollars",
@@ -57,6 +58,7 @@ def login():
             return redirect(url_for("index"))
         else:
             flash("Incorrect password. Please try again.")
+            return render_template("login.html")
     return render_template("login.html")
 
 @app.route("/logout")
@@ -67,8 +69,15 @@ def logout():
 @app.route("/")
 @login_required
 def index():
-    response = supabase.table("tickler_records").select("*").order("follow_up_date", desc=False).execute()
-    records = response.data if response.data else []
+    records = []
+    if supabase:
+        try:
+            response = supabase.table("tickler_records").select("*").order("follow_up_date", desc=False).execute()
+            records = response.data if response.data else []
+        except Exception as e:
+            print(f"Supabase error: {e}")
+            records = []
+            
     return render_template("index.html", records=records, categories=CATEGORIES)
 
 @app.route("/add", methods=["POST"])
@@ -84,13 +93,23 @@ def add_record():
         "notes": request.form.get("notes"),
         "status": "Pending"
     }
-    supabase.table("tickler_records").insert(data).execute()
+    if supabase:
+        try:
+            supabase.table("tickler_records").insert(data).execute()
+        except Exception as e:
+            print(f"Error adding record: {e}")
+            
     return redirect(url_for("index"))
 
 @app.route("/delete/<int:record_id>", methods=["POST"])
 @login_required
 def delete_record(record_id):
-    supabase.table("tickler_records").delete().eq("id", record_id).execute()
+    if supabase:
+        try:
+            supabase.table("tickler_records").delete().eq("id", record_id).execute()
+        except Exception as e:
+            print(f"Error deleting record: {e}")
+            
     return redirect(url_for("index"))
 
 if __name__ == "__main__":
