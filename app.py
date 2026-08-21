@@ -11,12 +11,18 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super-secret-tickler-key")
 # App Password
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "password123")
 
-# Supabase Credentials
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+# Supabase Credentials with sanitization
+SUPABASE_URL = (os.environ.get("SUPABASE_URL") or "").strip()
+SUPABASE_KEY = (os.environ.get("SUPABASE_KEY") or "").strip()
 
-# Initialize Supabase client safely
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if (SUPABASE_URL and SUPABASE_KEY) else None
+# Initialize Supabase client safely without crashing app startup
+supabase: Client = None
+if SUPABASE_URL.startswith("http://") or SUPABASE_URL.startswith("https://"):
+    try:
+        if SUPABASE_KEY:
+            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        print(f"Supabase client initialization error: {e}")
 
 CATEGORIES = [
     "Walking For Dollars",
@@ -75,7 +81,7 @@ def index():
             response = supabase.table("tickler_records").select("*").order("id", desc=True).execute()
             records = response.data if response.data else []
         except Exception as e:
-            print(f"Supabase error: {e}")
+            print(f"Supabase query error: {e}")
             records = []
             
     return render_template("index.html", records=records, categories=CATEGORIES)
