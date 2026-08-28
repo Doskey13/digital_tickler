@@ -3,109 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doskey's Digital Tickler System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Doskey's Digital Systems</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; }
+        .card { margin-bottom: 20px; }
+        #calendar { background: white; padding: 15px; border-radius: 8px; }
+    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen p-6">
-    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6">
-        
-        <!-- HEADER -->
-        <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <h1 class="text-2xl font-bold text-slate-800">Doskey's Digital Tickler System</h1>
-            <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-semibold">Logout</a>
-        </div>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">Doskey's Workspace</h2>
 
-        <!-- ADD RECORD FORM -->
-        <div class="bg-slate-50 p-4 rounded-lg border mb-8">
-            <h2 class="text-lg font-bold mb-4 text-slate-700">Add New Record</h2>
-            <form action="{{ url_for('add_record') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Client / Property Name</label>
-                    <input type="text" name="client_name" required class="w-full border rounded p-2 text-sm">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4 justify-content-center" id="workspaceTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="tickler-tab" data-bs-toggle="tab" data-bs-target="#tickler" type="button">Digital Tickler</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule" type="button">Daily 24-Hour Schedule</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="workspaceTabsContent">
+            <!-- TICKLER SECTION -->
+            <div class="tab-pane fade show active" id="tickler" role="tabpanel">
+                <div class="card p-4">
+                    <h4>Add New Tickler Record</h4>
+                    <form action="/add_tickler" method="POST" class="row g-3">
+                        <div class="col-md-6"><input type="text" name="client_name" class="form-control" placeholder="Client / Address" required></div>
+                        <div class="col-md-6"><input type="text" name="category" class="form-control" placeholder="Category"></div>
+                        <div class="col-md-6"><input type="date" name="gen_date" class="form-control" title="Generated Date"></div>
+                        <div class="col-md-6"><input type="date" name="followup_date" class="form-control" title="Follow-up Date"></div>
+                        <div class="col-md-6"><input type="text" name="phone" class="form-control" placeholder="Phone"></div>
+                        <div class="col-md-6"><input type="email" name="email" class="form-control" placeholder="Email"></div>
+                        <div class="col-12"><textarea name="notes" class="form-control" placeholder="Notes / Context"></textarea></div>
+                        <div class="col-12"><button type="submit" class="btn btn-primary">Add to Tickler</button></div>
+                    </form>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Category</label>
-                    <select name="category" class="w-full border rounded p-2 text-sm bg-white">
-                        {% for cat in categories %}
-                            <option value="{{ cat }}">{{ cat }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Generated Date</label>
-                    <input type="date" name="generated_date" required class="w-full border rounded p-2 text-sm">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Follow-Up Date</label>
-                    <input type="date" name="follow_up_date" required class="w-full border rounded p-2 text-sm">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Phone Number</label>
-                    <input type="text" name="phone" class="w-full border rounded p-2 text-sm">
-                </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Email Address</label>
-                    <input type="email" name="email" class="w-full border rounded p-2 text-sm">
-                </div>
-
-                <div class="md:col-span-3 lg:col-span-5">
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Notes / Context</label>
-                    <textarea name="notes" rows="2" class="w-full border rounded p-2 text-sm"></textarea>
-                </div>
-
-                <div>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">Add to Tickler</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- ACTIVE RECORDS TABLE -->
-        <h2 class="text-lg font-bold mb-4 text-slate-700">Active Tickler Records</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-800 text-white text-sm">
-                        <th class="p-3">Follow-Up</th>
-                        <th class="p-3">Client / Contact</th>
-                        <th class="p-3">Category</th>
-                        <th class="p-3">Phone</th>
-                        <th class="p-3">Email</th>
-                        <th class="p-3">Notes</th>
-                        <th class="p-3">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y text-sm">
-                    {% if records %}
-                        {% for r in records %}
-                            <tr class="hover:bg-slate-50">
-                                <td class="p-3 font-semibold text-blue-600">{{ r.follow_up_date or 'N/A' }}</td>
-                                <td class="p-3 font-bold">{{ r.client_name or 'N/A' }}</td>
-                                <td class="p-3"><span class="bg-slate-200 text-slate-800 px-2 py-1 rounded text-xs font-semibold">{{ r.category or 'N/A' }}</span></td>
-                                <td class="p-3">{{ r.phone or '-' }}</td>
-                                <td class="p-3">{{ r.email or '-' }}</td>
-                                <td class="p-3 text-slate-600">{{ r.notes or '-' }}</td>
-                                <td class="p-3">
-                                    <form action="{{ url_for('delete_record', record_id=r.id) }}" method="POST" onsubmit="return confirm('Delete this record?');">
-                                        <button type="submit" class="text-red-600 hover:text-red-800 font-bold text-xs">Delete</button>
-                                    </form>
-                                </td>
+                <div class="card p-4">
+                    <h4>Active Tickler Records</h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Follow-Up</th>
+                                <th>Client / Contact</th>
+                                <th>Category</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Notes</th>
+                                <th>Action</th>
                             </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7" class="p-4 text-center text-slate-500">No records found. Add one above!</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+                        </thead>
+                        <tbody>
+                            {% for rec in records %}
+                            <tr>
+                                <td>{{ rec.followup_date }}</td>
+                                <td>{{ rec.client_name }}</td>
+                                <td><span class="badge bg-secondary">{{ rec.category }}</span></td>
+                                <td>{{ rec.phone }}</td>
+                                <td>{{ rec.email }}</td>
+                                <td>{{ rec.notes }}</td>
+                                <td><a href="/delete_tickler/{{ rec.id }}" class="btn btn-sm btn-danger">Delete</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
+            <!-- SCHEDULE SECTION -->
+            <div class="tab-pane fade" id="schedule" role="tabpanel">
+                <div class="card p-4">
+                    <h4>Add Scheduled Event</h4>
+                    <form action="/add_event" method="POST" class="row g-3">
+                        <div class="col-md-4"><input type="text" name="title" class="form-control" placeholder="Task Title" required></div>
+                        <div class="col-md-4"><input type="datetime-local" name="start_time" class="form-control" required></div>
+                        <div class="col-md-4"><input type="datetime-local" name="end_time" class="form-control" required></div>
+                        <div class="col-12"><textarea name="notes" class="form-control" placeholder="Event Details / Notes"></textarea></div>
+                        <div class="col-12"><button type="submit" class="btn btn-success">Schedule Task</button></div>
+                    </form>
+                </div>
+
+                <div class="card p-4">
+                    <h4>Daily Timeline View</h4>
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridDay',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'timeGridDay,timeGridWeek,dayGridMonth'
+                },
+                events: [
+                    {% for ev in events %}
+                    {
+                        title: {{ ev.title | tojson }},
+                        start: {{ ev.start_time | tojson }},
+                        end: {{ ev.end_time | tojson }}
+                    },
+                    {% endfor %}
+                ]
+            });
+
+            // Render calendar properly when switching tabs
+            var scheduleTab = document.getElementById('schedule-tab');
+            scheduleTab.addEventListener('shown.bs.tab', function () {
+                calendar.render();
+            });
+        });
+    </script>
 </body>
 </html>
