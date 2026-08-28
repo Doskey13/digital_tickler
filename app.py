@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 from supabase import create_client, Client
 
-app = Flask(__name__)
+APP_PASSWORD = "Doskey13@"
 
 # Supabase Credentials
 url: str = os.environ.get("SUPABASE_URL")
