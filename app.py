@@ -60,6 +60,12 @@ def add_event():
     status = request.form.get("status", "Pending")
     notes = request.form.get("notes")
 
+    # Format time strings to plain ISO strings without UTC conversion
+    if start_time and len(start_time) == 16:
+        start_time += ":00"
+    if end_time and len(end_time) == 16:
+        end_time += ":00"
+
     event_data = {
         "title": title,
         "start_time": start_time,
