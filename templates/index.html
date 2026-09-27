@@ -29,6 +29,9 @@
             <li class="nav-item">
                 <button class="nav-link" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule" type="button">Daily 24-Hour Schedule</button>
             </li>
+            <li class="nav-item ms-2">
+                <a href="/ledger" class="btn btn-outline-success">Account Ledger</a>
+            </li>
         </ul>
 
         <div class="tab-content" id="workspaceTabsContent">
@@ -188,7 +191,6 @@
                 eventClick: function(info) {
                     var eventObj = info.event;
                     
-                    // Format dates for datetime-local input
                     var startIso = eventObj.start ? eventObj.start.toISOString().slice(0, 16) : '';
                     var endIso = eventObj.end ? eventObj.end.toISOString().slice(0, 16) : '';
 
