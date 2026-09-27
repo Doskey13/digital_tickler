@@ -1,0 +1,27 @@
+<!-- Financial Overview Summary Cards -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card bg-dark text-light border-secondary">
+      <div class="card-body">
+        <h6 class="text-uppercase text-muted">Total Capital In (Credits)</h6>
+        <h3 class="text-success">${{ "{:,.2f}".format(credits) }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-dark text-light border-secondary">
+      <div class="card-body">
+        <h6 class="text-uppercase text-muted">Total Outflow (Debits)</h6>
+        <h3 class="text-danger">${{ "{:,.2f}".format(debits) }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card bg-dark text-light border-secondary">
+      <div class="card-body">
+        <h6 class="text-uppercase text-muted">Net Position</h6>
+        <h3 class="{{ 'text-primary' if balance >= 0 else 'text-warning' }}">${{ "{:,.2f}".format(balance) }}</h3>
+      </div>
+    </div>
+  </div>
+</div>
