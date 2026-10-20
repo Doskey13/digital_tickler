@@ -122,8 +122,15 @@
                         <div class="col-md-4"><input type="datetime-local" name="end_time" class="form-control" required></div>
                         <div class="col-12"><textarea name="notes" class="form-control" placeholder="Event Details / Notes"></textarea></div>
                        <div class="col-12">
-    <button type="submit" class="btn btn-success">Schedule Task</button>
-    <button type="button" class="btn btn-warning ms-2" onclick="syncToGoogleCalendar(document.getElementsByName('title')[0].value, document.getElementsByName('start_time')[0].value, document.getElementsByName('end_time')[0].value, document.getElementsByName('notes')[0].value, '')">
+   <button type="submit" class="btn btn-success">Schedule Task</button>
+    <button type="button" class="btn btn-warning ms-2" onclick="
+        let title = document.getElementsByName('title')[0].value || 'Scheduled Event';
+        let start = document.getElementsByName('start_time')[0].value;
+        let end = document.getElementsByName('end_time')[0].value || start;
+        let notes = document.getElementsByName('notes')[0].value || '';
+        if(!start) { alert('Please select a Start Time first!'); } 
+        else { syncToGoogleCalendar(title, start, end, notes, ''); }
+    ">
         <i class="bi bi-calendar-plus"></i> Sync to Google Calendar
     </button>
 </div>
