@@ -209,7 +209,13 @@
             scheduleTab.addEventListener('shown.bs.tab', function () {
                 calendar.render();
             });
-        });
+        function syncToGoogleCalendar(title, startTimeStr, endTimeStr, details, location) {
+    const startDate = new Date(startTimeStr).toISOString().replace(/-|:|\.\d\d\d/g, "");
+    const endDate = new Date(endTimeStr).toISOString().replace(/-|:|\.\d\d\d/g, "");
+    const baseUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE";
+    const eventUrl = `${baseUrl}&text=${encodeURIComponent(title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(details || 'Scheduled via Workspace')}&location=${encodeURIComponent(location || '')}&add=nathanielstovallmail@gmail.com`;
+    window.open(eventUrl, '_blank');
+}
     </script>
 </body>
 </html>
