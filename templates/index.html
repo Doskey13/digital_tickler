@@ -116,25 +116,30 @@
             <div class="tab-pane fade" id="schedule" role="tabpanel">
                 <div class="card p-4">
                     <h4>Add Scheduled Event</h4>
-                    <form action="/add_event" method="POST" class="row g-3">
-                        <div class="col-md-4"><input type="text" name="title" class="form-control" placeholder="Task Title" required></div>
-                        <div class="col-md-4"><input type="datetime-local" name="start_time" class="form-control" required></div>
-                        <div class="col-md-4"><input type="datetime-local" name="end_time" class="form-control" required></div>
-                        <div class="col-12"><textarea name="notes" class="form-control" placeholder="Event Details / Notes"></textarea></div>
-                       <div class="col-12">
-   <button type="submit" class="btn btn-success">Schedule Task</button>
-    <button type="button" class="btn btn-warning ms-2" onclick="
-        let title = document.getElementsByName('title')[0].value || 'Scheduled Event';
-        let start = document.getElementsByName('start_time')[0].value;
-        let end = document.getElementsByName('end_time')[0].value || start;
-        let notes = document.getElementsByName('notes')[0].value || '';
-        if(!start) { alert('Please select a Start Time first!'); } 
-        else { syncToGoogleCalendar(title, start, end, notes, ''); }
-    ">
-        <i class="bi bi-calendar-plus"></i> Sync to Google Calendar
-    </button>
-</div>
-                    </form>
+                  <form action="/add_event" method="POST" class="row g-3" id="scheduleForm">
+    <div class="col-md-4"><input type="text" name="title" id="title" class="form-control" placeholder="Task Title" required></div>
+    <div class="col-md-4"><input type="datetime-local" name="start_time" id="start_time" class="form-control" required></div>
+    <div class="col-md-4"><input type="datetime-local" name="end_time" id="end_time" class="form-control" required></div>
+    <div class="col-12"><textarea name="notes" id="notes" class="form-control" placeholder="Event Details / Notes"></textarea></div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-success" onclick="triggerDualSave()">
+            <i class="bi bi-save"></i> Save & Sync to Google Calendar
+        </button>
+    </div>
+</form>
+
+<script>
+function triggerDualSave() {
+    let title = document.getElementById('title').value || 'Scheduled Event';
+    let start = document.getElementById('start_time').value;
+    let end = document.getElementById('end_time').value || start;
+    let notes = document.getElementById('notes').value || '';
+    
+    if (start) {
+        syncToGoogleCalendar(title, start, end, notes, '');
+    }
+}
+</script>
                 </div>
 
                 <div class="card p-4">
@@ -221,11 +226,16 @@
             scheduleTab.addEventListener('shown.bs.tab', function () {
                 calendar.render();
             });
-        function syncToGoogleCalendar(title, startTimeStr, endTimeStr, details, location) {
+function syncToGoogleCalendar(title, startTimeStr, endTimeStr, details, location) {
+    if (!startTimeStr) {
+        alert('Please select a Start Time first!');
+        return;
+    }
     const startDate = new Date(startTimeStr).toISOString().replace(/-|:|\.\d\d\d/g, "");
-    const endDate = new Date(endTimeStr).toISOString().replace(/-|:|\.\d\d\d/g, "");
+    const endDate = endTimeStr ? new Date(endTimeStr).toISOString().replace(/-|:|\.\d\d\d/g, "") : startDate;
     const baseUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE";
-    const eventUrl = `${baseUrl}&text=${encodeURIComponent(title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(details || 'Scheduled via Workspace')}&location=${encodeURIComponent(location || '')}&add=nathanielstovallmail@gmail.com`;
+    const eventUrl = `${baseUrl}&text=${encodeURIComponent(title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(location)}`;
+    
     window.open(eventUrl, '_blank');
 }
     </script>
