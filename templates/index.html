@@ -10,7 +10,7 @@
     <style>
         body { background-color: #f8f9fa; padding: 20px; }
         .card { margin-bottom: 20px; }
-        #calendar { background: white; padding: 15px; border-radius: 8px; }
+        #calendar { background: white; padding: 15px; border-radius: 8px; height: 700px; }
         .fc-event { cursor: pointer; }
     </style>
 </head>
@@ -71,7 +71,7 @@
                                 {% for item in ticklers %}
                                 <tr>
                                     <td>{{ item.follow_up_date }}</td>
-                                    <td>{{ item.client_contact }}</td>
+                                    <td>{{ item.client_name }}</td>
                                     <td><span class="badge bg-secondary">{{ item.category }}</span></td>
                                     <td>{{ item.phone }}</td>
                                     <td>{{ item.email }}</td>
@@ -129,7 +129,9 @@
                     center: 'title',
                     right: 'timeGridDay,timeGridWeek,dayGridMonth'
                 },
-                events: '/get_events'
+                events: '/get_events',
+                height: '100%',
+                expandRows: true
             });
             calendar.render();
         });
