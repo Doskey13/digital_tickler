@@ -15,6 +15,7 @@ def index():
         response = supabase.table("tickler_records").select("*").order("follow_up_date", desc=False).execute()
         ticklers = response.data if response.data else []
     except Exception as e:
+        print(f"FETCH ERROR: {e}")
         ticklers = []
     return render_template('index.html', ticklers=ticklers)
 
@@ -22,26 +23,27 @@ def index():
 def add_tickler():
     client_name = request.form.get('client_contact')
     category = request.form.get('category')
-    entry_date = request.form.get('entry_date')
     follow_up_date = request.form.get('follow_up_date')
     phone = request.form.get('phone') or None
     email = request.form.get('email') or None
     notes = request.form.get('notes') or None
 
+    # Only include columns that actually exist in the Supabase tickler_records table
     data = {
         "client_name": client_name,
         "category": category,
-        "entry_date": entry_date,
         "follow_up_date": follow_up_date,
         "phone": phone,
         "email": email,
-        "notes": notes
+        "notes": notes,
+        "status": "Pending"
     }
 
     try:
-        supabase.table("tickler_records").insert(data).execute()
+        response = supabase.table("tickler_records").insert(data).execute()
+        print(f"INSERT SUCCESS: {response}")
     except Exception as e:
-        pass
+        print(f"INSERT ERROR: {e}")
 
     return redirect(url_for('index'))
 
@@ -50,7 +52,7 @@ def delete_tickler(id):
     try:
         supabase.table("tickler_records").delete().eq("id", id).execute()
     except Exception as e:
-        pass
+        print(f"DELETE ERROR: {e}")
     return redirect(url_for('index'))
 
 @app.route('/add_event', methods=['POST'])
@@ -64,13 +66,14 @@ def add_event():
         "title": title,
         "start_time": start_time,
         "end_time": end_time,
-        "notes": notes
+        "notes": notes,
+        "status": "Pending"
     }
 
     try:
         supabase.table("schedule_events").insert(data).execute()
     except Exception as e:
-        pass
+        print(f"EVENT ERROR: {e}")
 
     return redirect(url_for('index'))
 
@@ -89,6 +92,7 @@ def get_events():
             })
         return formatted_events
     except Exception as e:
+        print(f"GET EVENTS ERROR: {e}")
         return []
 
 @app.route('/logout')
