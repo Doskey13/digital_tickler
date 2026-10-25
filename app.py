@@ -12,14 +12,14 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @app.route('/')
 def index():
-    # Fetch tickler records from Supabase
-    response = supabase.table("ticklers").select("*").order("follow_up_date", desc=False).execute()
+    # Fetch tickler records from exact Supabase table: tickler_records
+    response = supabase.table("tickler_records").select("*").order("follow_up_date", desc=False).execute()
     ticklers = response.data if response.data else []
     return render_template('index.html', ticklers=ticklers)
 
 @app.route('/add_tickler', methods=['POST'])
 def add_tickler():
-    client_contact = request.form.get('client_contact')
+    client_name = request.form.get('client_contact')
     category = request.form.get('category')
     entry_date = request.form.get('entry_date')
     follow_up_date = request.form.get('follow_up_date')
@@ -27,8 +27,8 @@ def add_tickler():
     email = request.form.get('email')
     notes = request.form.get('notes')
 
-    supabase.table("ticklers").insert({
-        "client_contact": client_contact,
+    supabase.table("tickler_records").insert({
+        "client_name": client_name,
         "category": category,
         "entry_date": entry_date,
         "follow_up_date": follow_up_date,
@@ -41,7 +41,7 @@ def add_tickler():
 
 @app.route('/delete_tickler/<int:id>')
 def delete_tickler(id):
-    supabase.table("ticklers").delete().eq("id", id).execute()
+    supabase.table("tickler_records").delete().eq("id", id).execute()
     return redirect(url_for('index'))
 
 @app.route('/add_event', methods=['POST'])
@@ -51,7 +51,7 @@ def add_event():
     end_time = request.form.get('end_time')
     notes = request.form.get('notes')
 
-    supabase.table("events").insert({
+    supabase.table("schedule_events").insert({
         "title": title,
         "start_time": start_time,
         "end_time": end_time,
@@ -62,7 +62,7 @@ def add_event():
 
 @app.route('/get_events')
 def get_events():
-    response = supabase.table("events").select("*").execute()
+    response = supabase.table("schedule_events").select("*").execute()
     events = response.data if response.data else []
     formatted_events = []
     for ev in events:
