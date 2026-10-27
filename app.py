@@ -10,7 +10,22 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Fetch tickler records and schedule events from Supabase
+    ticklers = []
+    events = []
+    try:
+        tickler_response = supabase.table("tickler_records").select("*").execute()
+        ticklers = tickler_response.data
+    except Exception as e:
+        print(f"Error fetching ticklers: {e}")
+
+    try:
+        event_response = supabase.table("schedule_events").select("*").execute()
+        events = event_response.data
+    except Exception as e:
+        print(f"Error fetching events: {e}")
+
+    return render_template('index.html', ticklers=ticklers, events=events)
 
 @app.route('/add_tickler', methods=['POST'])
 def add_tickler():
