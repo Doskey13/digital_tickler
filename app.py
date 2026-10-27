@@ -1,3 +1,17 @@
+import os
+from flask import Flask, render_template, request, redirect, url_for
+from supabase import create_client, Client
+
+app = Flask(__name__)
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/add_tickler', methods=['POST'])
 def add_tickler():
     client_name = request.form.get('client_contact')
@@ -45,3 +59,6 @@ def add_event():
         print(f"DEBUG ERROR INSERTING EVENT: {e}")
 
     return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
