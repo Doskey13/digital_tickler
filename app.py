@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from supabase import create_client, Client
 
 app = Flask(__name__)
@@ -11,24 +11,35 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 @app.route('/')
 def index():
     ticklers = []
-    events = []
     try:
         tickler_response = supabase.table("tickler_records").select("*").execute()
         ticklers = tickler_response.data or []
     except Exception as e:
         print(f"Error fetching ticklers: {e}")
 
-    try:
-        event_response = supabase.table("schedule_events").select("*").execute()
-        events = event_response.data or []
-    except Exception as e:
-        print(f"Error fetching events: {e}")
+    return render_template('index.html', ticklers=ticklers)
 
-    return render_template('index.html', ticklers=ticklers, events=events)
+@app.route('/get_events', methods=['GET'])
+def get_events():
+    try:
+        response = supabase.table("schedule_events").select("*").execute()
+        events = response.data or []
+        formatted_events = []
+        for ev in events:
+            formatted_events.append({
+                "id": ev.get("id"),
+                "title": ev.get("title"),
+                "start": ev.get("start_time"),
+                "end": ev.get("end_time"),
+                "description": ev.get("notes")
+            })
+        return jsonify(formatted_events)
+    except Exception as e:
+        print(f"Error fetching calendar events: {e}")
+        return jsonify([])
 
 @app.route('/add_tickler', methods=['POST'])
 def add_tickler():
-    # Accepts multiple possible form field names to prevent silent drops
     client_name = (
         request.form.get('client_contact') or 
         request.form.get('client_name') or 
@@ -52,8 +63,7 @@ def add_tickler():
     }
 
     try:
-        response = supabase.table("tickler_records").insert(data).execute()
-        print(f"TICKLER INSERT SUCCESS: {response}")
+        supabase.table("tickler_records").insert(data).execute()
     except Exception as e:
         print(f"DEBUG ERROR INSERTING TICKLER: {e}")
 
@@ -80,8 +90,7 @@ def add_event():
     }
 
     try:
-        response = supabase.table("schedule_events").insert(data).execute()
-        print(f"EVENT INSERT SUCCESS: {response}")
+        supabase.table("schedule_events").insert(data).execute()
     except Exception as e:
         print(f"DEBUG ERROR INSERTING EVENT: {e}")
 
