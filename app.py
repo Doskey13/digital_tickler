@@ -10,18 +10,17 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @app.route('/')
 def index():
-    # Fetch tickler records and schedule events from Supabase
     ticklers = []
     events = []
     try:
         tickler_response = supabase.table("tickler_records").select("*").execute()
-        ticklers = tickler_response.data
+        ticklers = tickler_response.data or []
     except Exception as e:
         print(f"Error fetching ticklers: {e}")
 
     try:
         event_response = supabase.table("schedule_events").select("*").execute()
-        events = event_response.data
+        events = event_response.data or []
     except Exception as e:
         print(f"Error fetching events: {e}")
 
@@ -29,12 +28,18 @@ def index():
 
 @app.route('/add_tickler', methods=['POST'])
 def add_tickler():
-    client_name = request.form.get('client_contact')
-    category = request.form.get('category')
-    follow_up_date = request.form.get('follow_up_date')
-    phone = request.form.get('phone') or None
+    # Accepts multiple possible form field names to prevent silent drops
+    client_name = (
+        request.form.get('client_contact') or 
+        request.form.get('client_name') or 
+        request.form.get('name') or 
+        "Unnamed Record"
+    )
+    category = request.form.get('category') or "General"
+    follow_up_date = request.form.get('follow_up_date') or request.form.get('date') or None
+    phone = request.form.get('phone') or request.form.get('phone_number') or None
     email = request.form.get('email') or None
-    notes = request.form.get('notes') or None
+    notes = request.form.get('notes') or request.form.get('notes_details') or None
 
     data = {
         "client_name": client_name,
@@ -47,7 +52,8 @@ def add_tickler():
     }
 
     try:
-        supabase.table("tickler_records").insert(data).execute()
+        response = supabase.table("tickler_records").insert(data).execute()
+        print(f"TICKLER INSERT SUCCESS: {response}")
     except Exception as e:
         print(f"DEBUG ERROR INSERTING TICKLER: {e}")
 
@@ -55,10 +61,15 @@ def add_tickler():
 
 @app.route('/add_event', methods=['POST'])
 def add_event():
-    title = request.form.get('title')
-    start_time = request.form.get('start_time')
-    end_time = request.form.get('end_time')
-    notes = request.form.get('notes') or None
+    title = (
+        request.form.get('title') or 
+        request.form.get('task_title') or 
+        request.form.get('event_title') or 
+        "Untitled Event"
+    )
+    start_time = request.form.get('start_time') or request.form.get('start') or None
+    end_time = request.form.get('end_time') or request.form.get('end') or None
+    notes = request.form.get('notes') or request.form.get('event_details') or None
 
     data = {
         "title": title,
@@ -69,7 +80,8 @@ def add_event():
     }
 
     try:
-        supabase.table("schedule_events").insert(data).execute()
+        response = supabase.table("schedule_events").insert(data).execute()
+        print(f"EVENT INSERT SUCCESS: {response}")
     except Exception as e:
         print(f"DEBUG ERROR INSERTING EVENT: {e}")
 
