@@ -81,6 +81,17 @@ def add_event():
     end_time = request.form.get('end_time') or request.form.get('end') or None
     notes = request.form.get('notes') or request.form.get('event_details') or None
 
+    # Attach local Eastern Time offset (-04:00) so calendar renders correct hours
+    if start_time and len(start_time) == 16:
+        start_time += ":00-04:00"
+    elif start_time and len(start_time) == 10:  # If date only
+        start_time += "T00:00:00-04:00"
+
+    if end_time and len(end_time) == 16:
+        end_time += ":00-04:00"
+    elif end_time and len(end_time) == 10:
+        end_time += "T00:00:00-04:00"
+
     data = {
         "title": title,
         "start_time": start_time,
