@@ -131,9 +131,23 @@
                 events: '/get_events',
                 height: 650,
                 expandRows: true
-            });
-            calendar.render();
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridDay',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'timeGridDay,timeGridWeek,dayGridMonth'
+            },
+            events: '/get_events',
+            height: 650,
+            expandRows: true,
+            eventClick: function(info) {
+                if (confirm("Do you want to delete the appointment: '" + info.event.title + "'?")) {
+                    window.location.href = "/delete_event/" + info.event.id;
+                }
+            }
         });
+        calendar.render();
     </script>
 </body>
 </html>
