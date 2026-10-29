@@ -117,7 +117,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
@@ -130,24 +130,21 @@
                 },
                 events: '/get_events',
                 height: 650,
-                expandRows: true
-                var calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridDay',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'timeGridDay,timeGridWeek,dayGridMonth'
-            },
-            events: '/get_events',
-            height: 650,
-            expandRows: true,
-            eventClick: function(info) {
-                if (confirm("Do you want to delete the appointment: '" + info.event.title + "'?")) {
-                    window.location.href = "/delete_event/" + info.event.id;
+                expandRows: true,
+                eventClick: function(info) {
+                    if (confirm("Do you want to delete the appointment: '" + info.event.title + "'?")) {
+                        window.location.href = "/delete_event/" + info.event.id;
+                    }
                 }
+            });
+            calendar.render();
+
+            // Refresh calendar size when switching to the schedule tab
+            var scheduleTabBtn = document.getElementById('schedule-tab');
+            if (scheduleTabBtn) {
+                scheduleTabBtn.addEventListener('shown.bs.tab', function () {
+                    calendar.updateSize();
+                });
             }
         });
-        calendar.render();
     </script>
-</body>
-</html>
