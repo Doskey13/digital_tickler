@@ -69,6 +69,14 @@ def add_tickler():
 
     return redirect(url_for('index'))
 
+@app.route('/delete_tickler/<int:record_id>', methods=['POST', 'GET'])
+def delete_tickler(record_id):
+    try:
+        supabase.table("tickler_records").delete().eq("id", record_id).execute()
+    except Exception as e:
+        print(f"Error deleting tickler record: {e}")
+    return redirect(url_for('index'))
+
 @app.route('/add_event', methods=['POST'])
 def add_event():
     title = (
@@ -104,6 +112,14 @@ def add_event():
     except Exception as e:
         print(f"DEBUG ERROR INSERTING EVENT: {e}")
 
+    return redirect(url_for('index'))
+
+@app.route('/delete_event/<int:event_id>', methods=['POST', 'GET'])
+def delete_event(event_id):
+    try:
+        supabase.table("schedule_events").delete().eq("id", event_id).execute()
+    except Exception as e:
+        print(f"Error deleting schedule event: {e}")
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
