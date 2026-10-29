@@ -101,7 +101,7 @@
 
                 <div class="card p-4">
                     <h4>Daily Timeline View</h4>
-                    <p class="text-muted small">Click any scheduled task on the calendar to Edit or Delete it.</p>
+                    <p class="text-muted small">Click any scheduled task on the calendar to view full notes or delete it.</p>
                     <div id="calendar"></div>
                 </div>
             </div>
@@ -117,7 +117,29 @@
         </div>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- EVENT DETAILS MODAL POPUP -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Appointment Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Title:</strong> <span id="modalEventTitle"></span></p>
+                    <p><strong>Time:</strong> <span id="modalEventTime"></span></p>
+                    <p><strong>Notes / Details:</strong></p>
+                    <p id="modalEventNotes" class="p-3 bg-light border rounded" style="white-space: pre-wrap; word-break: break-word;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a id="modalDeleteBtn" href="#" class="btn btn-danger" onclick="return confirm('Delete this appointment?')">Delete Appointment</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
@@ -132,14 +154,23 @@
                 height: 650,
                 expandRows: true,
                 eventClick: function(info) {
-                    if (confirm("Do you want to delete the appointment: '" + info.event.title + "'?")) {
-                        window.location.href = "/delete_event/" + info.event.id;
-                    }
+                    document.getElementById('modalEventTitle').innerText = info.event.title;
+                    
+                    var startStr = info.event.start ? info.event.start.toLocaleString() : '';
+                    var endStr = info.event.end ? info.event.end.toLocaleString() : '';
+                    document.getElementById('modalEventTime').innerText = startStr + (endStr ? ' - ' + endStr : '');
+                    
+                    var notesText = info.event.extendedProps.description || "No notes provided for this event.";
+                    document.getElementById('modalEventNotes').innerText = notesText;
+                    
+                    document.getElementById('modalDeleteBtn').href = "/delete_event/" + info.event.id;
+                    
+                    var myModal = new bootstrap.Modal(document.getElementById('eventModal'));
+                    myModal.show();
                 }
             });
             calendar.render();
 
-            // Refresh calendar size when switching to the schedule tab
             var scheduleTabBtn = document.getElementById('schedule-tab');
             if (scheduleTabBtn) {
                 scheduleTabBtn.addEventListener('shown.bs.tab', function () {
@@ -148,3 +179,5 @@
             }
         });
     </script>
+</body>
+</html>
