@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from supabase import create_client, Client
 
 app = Flask(__name__)
@@ -37,41 +37,6 @@ def get_events():
     except Exception as e:
         print(f"Error fetching calendar events: {e}")
         return jsonify([])
-
-@app.route('/calendar.ics')
-def calendar_ics():
-    try:
-        response = supabase.table("schedule_events").select("*").execute()
-        events = response.data or []
-        
-        ics_lines = [
-            "BEGIN:VCALENDAR",
-            "VERSION:2.0",
-            "PRODID:-//Doskey Workspace//Digital Tickler//EN",
-            "X-WR-CALNAME:Doskey Schedule"
-        ]
-        
-        for ev in events:
-            title = ev.get("title", "Event")
-            start = (ev.get("start_time") or "").replace("-", "").replace(":", "").replace("+00:00", "Z")
-            end = (ev.get("end_time") or "").replace("-", "").replace(":", "").replace("+00:00", "Z")
-            notes = ev.get("notes") or ""
-            
-            ics_lines.append("BEGIN:VEVENT")
-            ics_lines.append(f"SUMMARY:{title}")
-            if start:
-                ics_lines.append(f"DTSTART:{start}")
-            if end:
-                ics_lines.append(f"DTEND:{end}")
-            if notes:
-                ics_lines.append(f"DESCRIPTION:{notes}")
-            ics_lines.append("END:VEVENT")
-            
-        ics_lines.append("END:VCALENDAR")
-        ics_content = "\r\n".join(ics_lines)
-        return Response(ics_content, mimetype="text/calendar")
-    except Exception as e:
-        return f"Error generating feed: {e}", 500
 
 @app.route('/add_tickler', methods=['POST'])
 def add_tickler():
